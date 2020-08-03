@@ -43,17 +43,19 @@ class BitcoinKit : AbstractKit {
             words: List<String>,
             passphrase: String,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
             confirmationsThreshold: Int = 6,
             bip: Bip = Bip.BIP44
-    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, networkType, peerSize, syncMode, confirmationsThreshold, bip)
+    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, initialSyncApi, networkType, peerSize, syncMode, confirmationsThreshold, bip)
 
     constructor(
             context: Context,
             seed: ByteArray,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
@@ -62,21 +64,10 @@ class BitcoinKit : AbstractKit {
     ) {
         val database = CoreDatabase.getInstance(context, getDatabaseName(networkType, walletId, syncMode, bip))
         val storage = Storage(database)
-        val initialSyncApi: IInitialSyncApi
-
         network = when (networkType) {
-            NetworkType.MainNet -> {
-                initialSyncApi = InsightApi("https://explorer.api.bitcoin.com/btc/v1")
-                MainNet()
-            }
-            NetworkType.TestNet -> {
-                initialSyncApi = BCoinApi("https://btc-testnet.horizontalsystems.xyz/api")
-                TestNet()
-            }
-            NetworkType.RegTest -> {
-                initialSyncApi = InsightApi("")
-                RegTest()
-            }
+            NetworkType.MainNet -> MainNet()
+            NetworkType.TestNet -> TestNet()
+            NetworkType.RegTest -> RegTest()
         }
 
         val paymentAddressParser = PaymentAddressParser("bitcoin", removeScheme = true)

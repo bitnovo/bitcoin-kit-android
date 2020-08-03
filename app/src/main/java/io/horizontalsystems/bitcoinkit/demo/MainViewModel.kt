@@ -9,6 +9,7 @@ import io.horizontalsystems.bitcoincore.BitcoinCore.KitState
 import io.horizontalsystems.bitcoincore.core.Bip
 import io.horizontalsystems.bitcoincore.core.IPluginData
 import io.horizontalsystems.bitcoincore.exceptions.AddressFormatException
+import io.horizontalsystems.bitcoincore.managers.BCoinApi
 import io.horizontalsystems.bitcoincore.managers.SendValueErrors
 import io.horizontalsystems.bitcoincore.models.BalanceInfo
 import io.horizontalsystems.bitcoincore.models.BlockInfo
@@ -55,7 +56,8 @@ class MainViewModel : ViewModel(), BitcoinKit.Listener {
         val words = "used ugly meat glad balance divorce inner artwork hire invest already piano".split(" ")
         val passphrase = ""
 
-        bitcoinKit = BitcoinKit(App.instance, words, passphrase, walletId, networkType, syncMode = syncMode, bip = bip)
+        val api = BCoinApi("https://btc.horizontalsystems.xyz/apg")
+        bitcoinKit = BitcoinKit(App.instance, words, passphrase, walletId, api, networkType, syncMode = syncMode, bip = bip)
 
         bitcoinKit.listener = this
 

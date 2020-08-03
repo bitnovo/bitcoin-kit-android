@@ -11,6 +11,7 @@ import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorChain
 import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorSet
 import io.horizontalsystems.bitcoincore.blocks.validators.LegacyTestNetDifficultyValidator
 import io.horizontalsystems.bitcoincore.core.Bip
+import io.horizontalsystems.bitcoincore.core.IInitialSyncApi
 import io.horizontalsystems.bitcoincore.managers.*
 import io.horizontalsystems.bitcoincore.network.Network
 import io.horizontalsystems.bitcoincore.storage.CoreDatabase
@@ -44,17 +45,19 @@ class LitecoinKit : AbstractKit {
             words: List<String>,
             passphrase: String,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
             confirmationsThreshold: Int = 6,
             bip: Bip = Bip.BIP44
-    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, networkType, peerSize, syncMode, confirmationsThreshold, bip)
+    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, initialSyncApi, networkType, peerSize, syncMode, confirmationsThreshold, bip)
 
     constructor(
             context: Context,
             seed: ByteArray,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
@@ -63,21 +66,13 @@ class LitecoinKit : AbstractKit {
     ) {
         val database = CoreDatabase.getInstance(context, getDatabaseName(networkType, walletId, syncMode, bip))
         val storage = Storage(database)
-        var initialSyncUrl = ""
 
         network = when (networkType) {
-            NetworkType.MainNet -> {
-                initialSyncUrl = "https://ltc.horizontalsystems.xyz/api"
-                MainNetLitecoin()
-            }
-            NetworkType.TestNet -> {
-                initialSyncUrl = ""
-                TestNetLitecoin()
-            }
+            NetworkType.MainNet -> MainNetLitecoin()
+            NetworkType.TestNet -> TestNetLitecoin()
         }
 
         val paymentAddressParser = PaymentAddressParser("litecoin", removeScheme = true)
-        val initialSyncApi = BCoinApi(initialSyncUrl)
 
         val blockValidatorSet = BlockValidatorSet()
 

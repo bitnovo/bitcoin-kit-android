@@ -16,9 +16,9 @@ import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorChain
 import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorSet
 import io.horizontalsystems.bitcoincore.blocks.validators.LegacyDifficultyAdjustmentValidator
 import io.horizontalsystems.bitcoincore.blocks.validators.ProofOfWorkValidator
+import io.horizontalsystems.bitcoincore.core.IInitialSyncApi
 import io.horizontalsystems.bitcoincore.extensions.toReversedByteArray
 import io.horizontalsystems.bitcoincore.managers.Bip44RestoreKeyConverter
-import io.horizontalsystems.bitcoincore.managers.InsightApi
 import io.horizontalsystems.bitcoincore.network.Network
 import io.horizontalsystems.bitcoincore.storage.CoreDatabase
 import io.horizontalsystems.bitcoincore.storage.Storage
@@ -60,16 +60,18 @@ class BitcoinCashKit : AbstractKit {
             words: List<String>,
             passphrase: String,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet(MainNetBitcoinCash.CoinType.Type145),
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
             confirmationsThreshold: Int = 6
-    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, networkType, peerSize, syncMode, confirmationsThreshold)
+    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, initialSyncApi, networkType, peerSize, syncMode, confirmationsThreshold)
 
     constructor(
             context: Context,
             seed: ByteArray,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet(MainNetBitcoinCash.CoinType.Type145),
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
@@ -77,21 +79,13 @@ class BitcoinCashKit : AbstractKit {
     ) {
         val database = CoreDatabase.getInstance(context, getDatabaseName(networkType, walletId, syncMode))
         val storage = Storage(database)
-        val initialSyncUrl: String
 
         network = when (networkType) {
-            is NetworkType.MainNet -> {
-                initialSyncUrl = "https://explorer.api.bitcoin.com/bch/v1"
-                MainNetBitcoinCash(networkType.coinType)
-            }
-            NetworkType.TestNet -> {
-                initialSyncUrl = "https://explorer.api.bitcoin.com/tbch/v1"
-                TestNetBitcoinCash()
-            }
+            is NetworkType.MainNet -> MainNetBitcoinCash(networkType.coinType)
+            is NetworkType.TestNet -> TestNetBitcoinCash()
         }
 
         val paymentAddressParser = PaymentAddressParser("bitcoincash", removeScheme = false)
-        val initialSyncApi = InsightApi(initialSyncUrl)
 
         val blockValidatorSet = BlockValidatorSet()
         blockValidatorSet.addBlockValidator(ProofOfWorkValidator())

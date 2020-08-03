@@ -9,8 +9,12 @@ import io.horizontalsystems.bitcoincore.BitcoinCoreBuilder
 import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorChain
 import io.horizontalsystems.bitcoincore.blocks.validators.BlockValidatorSet
 import io.horizontalsystems.bitcoincore.blocks.validators.ProofOfWorkValidator
+import io.horizontalsystems.bitcoincore.core.IInitialSyncApi
 import io.horizontalsystems.bitcoincore.extensions.hexToByteArray
-import io.horizontalsystems.bitcoincore.managers.*
+import io.horizontalsystems.bitcoincore.managers.Bip44RestoreKeyConverter
+import io.horizontalsystems.bitcoincore.managers.BlockValidatorHelper
+import io.horizontalsystems.bitcoincore.managers.UnspentOutputSelector
+import io.horizontalsystems.bitcoincore.managers.UnspentOutputSelectorSingleNoChange
 import io.horizontalsystems.bitcoincore.models.BalanceInfo
 import io.horizontalsystems.bitcoincore.models.BlockInfo
 import io.horizontalsystems.bitcoincore.models.TransactionInfo
@@ -70,16 +74,18 @@ class DashKit : AbstractKit, IInstantTransactionDelegate, BitcoinCore.Listener {
             words: List<String>,
             passphrase: String,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
             confirmationsThreshold: Int = 6
-    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, networkType, peerSize, syncMode, confirmationsThreshold)
+    ) : this(context, Mnemonic().toSeed(words, passphrase), walletId, initialSyncApi, networkType, peerSize, syncMode, confirmationsThreshold)
 
     constructor(
             context: Context,
             seed: ByteArray,
             walletId: String,
+            initialSyncApi: IInitialSyncApi? = null,
             networkType: NetworkType = NetworkType.MainNet,
             peerSize: Int = 10,
             syncMode: SyncMode = SyncMode.Api(),
@@ -87,25 +93,17 @@ class DashKit : AbstractKit, IInstantTransactionDelegate, BitcoinCore.Listener {
     ) {
         val coreDatabase = CoreDatabase.getInstance(context, getDatabaseNameCore(networkType, walletId, syncMode))
         val dashDatabase = DashKitDatabase.getInstance(context, getDatabaseName(networkType, walletId, syncMode))
-        val initialSyncUrl: String
 
         val coreStorage = Storage(coreDatabase)
         dashStorage = DashStorage(dashDatabase, coreStorage)
 
         network = when (networkType) {
-            NetworkType.MainNet -> {
-                initialSyncUrl = "https://dash.horizontalsystems.xyz/apg"
-                MainNetDash()
-            }
-            NetworkType.TestNet -> {
-                initialSyncUrl = "http://dash-testnet.horizontalsystems.xyz/apg"
-                TestNetDash()
-            }
+            NetworkType.MainNet -> MainNetDash()
+            NetworkType.TestNet -> TestNetDash()
         }
 
         val paymentAddressParser = PaymentAddressParser("dash", removeScheme = true)
         val instantTransactionManager = InstantTransactionManager(dashStorage, InstantSendFactory(), InstantTransactionState())
-        val initialSyncApi = InsightApi(initialSyncUrl)
 
         dashTransactionInfoConverter = DashTransactionInfoConverter(instantTransactionManager)
 
