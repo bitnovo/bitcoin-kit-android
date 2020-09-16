@@ -2,13 +2,18 @@ package io.horizontalsystems.bitcoincore.managers
 
 import io.horizontalsystems.bitcoincore.core.IStorage
 import io.horizontalsystems.bitcoincore.core.Wallet
+import io.horizontalsystems.bitcoincore.crypto.Base58
+import io.horizontalsystems.bitcoincore.extensions.toHexString
 import io.horizontalsystems.bitcoincore.models.PublicKey
+import io.horizontalsystems.bitcoincore.network.Network
 import io.horizontalsystems.bitcoincore.storage.PublicKeyWithUsedState
+import okhttp3.internal.toHexString
 
 class PublicKeyManager(
         private val storage: IStorage,
         private val wallet: Wallet,
-        private val restoreKeyConverter: RestoreKeyConverterChain
+        private val restoreKeyConverter: RestoreKeyConverterChain,
+        private val network: Network
 ) : IBloomFilterProvider {
 
     // IBloomFilterProvider
@@ -116,9 +121,21 @@ class PublicKeyManager(
                 .firstOrNull() ?: throw Error.NoUnusedPublicKey
     }
 
+
+    fun extendedPublicKey(account: Int): String {
+        val hdKey = wallet.rootPrivateKey(account)
+        val networkVersion = network.bip32HeaderPub.toHexString().toByteArray()
+        val depth = "0x00".toByteArray()
+        val parentFingerpint = "0x00000000".toByteArray()
+        val childNumber = "0x00000000".toByteArray()
+        val xpubBytes = networkVersion + depth + parentFingerpint + childNumber + hdKey.chainCode + hdKey.pubKey
+        return Base58.encode(xpubBytes)
+    }
+
+
     companion object {
-        fun create(storage: IStorage, wallet: Wallet, restoreKeyConverter: RestoreKeyConverterChain): PublicKeyManager {
-            val addressManager = PublicKeyManager(storage, wallet, restoreKeyConverter)
+        fun create(storage: IStorage, wallet: Wallet, restoreKeyConverter: RestoreKeyConverterChain, network: Network): PublicKeyManager {
+            val addressManager = PublicKeyManager(storage, wallet, restoreKeyConverter, network)
             addressManager.fillGap()
             return addressManager
         }

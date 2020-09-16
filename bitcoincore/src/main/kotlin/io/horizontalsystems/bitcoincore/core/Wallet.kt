@@ -1,6 +1,7 @@
 package io.horizontalsystems.bitcoincore.core
 
 import io.horizontalsystems.bitcoincore.models.PublicKey
+import io.horizontalsystems.hdwalletkit.HDKey
 import io.horizontalsystems.hdwalletkit.HDWallet
 import java.lang.Exception
 
@@ -24,6 +25,10 @@ class Wallet(private val hdWallet: HDWallet) {
             val hdPublicKey = hdPublicKeys[position]
             PublicKey(account, index, external, hdPublicKey.publicKey, hdPublicKey.publicKeyHash)
         }
+    }
+
+    fun rootPrivateKey(account: Int): HDKey {
+        return hdWallet.rootPrivateKey(account)
     }
 
     open class HDWalletError : Exception() {

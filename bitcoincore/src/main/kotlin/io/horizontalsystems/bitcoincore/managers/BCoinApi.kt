@@ -9,7 +9,7 @@ class BCoinApi(host: String) : IInitialSyncApi {
     private val apiManager = ApiManager(host)
     private val logger = Logger.getLogger("BCoinApi")
 
-    override fun getTransactions(addresses: List<String>): List<TransactionItem> {
+    override fun getTransactions(addresses: List<String>, xpub: String): List<TransactionItem> {
         val requestData = JsonObject().apply {
             this["addresses"] = Json.array(*addresses.toTypedArray())
         }

@@ -156,7 +156,7 @@ class BitcoinCoreBuilder {
         val hdWallet = HDWallet(seed, network.coinType, purpose = bip.purpose)
 
         val wallet = Wallet(hdWallet)
-        val publicKeyManager = PublicKeyManager.create(storage, wallet, restoreKeyConverterChain)
+        val publicKeyManager = PublicKeyManager.create(storage, wallet, restoreKeyConverterChain, network)
         val pendingOutpointsProvider = PendingOutpointsProvider(storage)
 
         val irregularOutputFinder = IrregularOutputFinder(storage)
@@ -220,7 +220,7 @@ class BitcoinCoreBuilder {
         val transactionCreator = TransactionCreator(transactionBuilder, pendingTransactionProcessor, transactionSender, bloomFilterManager)
 
         val blockHashFetcher = BlockHashFetcher(restoreKeyConverterChain, initialSyncApi, BlockHashFetcherHelper())
-        val blockDiscovery = BlockDiscoveryBatch(wallet, blockHashFetcher, checkpoint.block.height)
+        val blockDiscovery = BlockDiscoveryBatch(wallet, blockHashFetcher, publicKeyManager, checkpoint.block.height)
         val apiSyncStateManager = ApiSyncStateManager(storage, network.syncableFromApi && syncMode is BitcoinCore.SyncMode.Api)
         val initialSyncer = InitialSyncer(storage, blockDiscovery, publicKeyManager)
 
@@ -601,6 +601,10 @@ class BitcoinCore(
 
     fun getTransaction(hash: String): TransactionInfo? {
         return dataProvider.getTransaction(hash)
+    }
+
+    fun getExtendedPublicKey(): String {
+        return ""
     }
 
     sealed class KitState {

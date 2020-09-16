@@ -14,7 +14,7 @@ class BlockHashFetcher(
 
     var listener: IApiSyncListener? = null
 
-    fun getBlockHashes(externalKeys: List<PublicKey>, internalKeys: List<PublicKey>): BlockHashesResponse {
+    fun getBlockHashes(externalKeys: List<PublicKey>, internalKeys: List<PublicKey>, xpub: String): BlockHashesResponse {
         val externalAddresses = externalKeys.map {
             restoreKeyConverter.keysForApiRestore(it)
         }
@@ -22,7 +22,7 @@ class BlockHashFetcher(
             restoreKeyConverter.keysForApiRestore(it)
         }
         val allAddresses = externalAddresses.flatten() + internalAddresses.flatten()
-        val transactions = initialSyncerApi.getTransactions(allAddresses)
+        val transactions = initialSyncerApi.getTransactions(allAddresses, xpub)
 
         if (transactions.isEmpty()) {
             return BlockHashesResponse(listOf(), -1, -1)

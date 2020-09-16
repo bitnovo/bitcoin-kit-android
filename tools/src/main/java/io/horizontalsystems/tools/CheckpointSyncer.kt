@@ -73,12 +73,8 @@ class CheckpointSyncer(
         val connectionManager = object : IConnectionManager {
             override val listener: IConnectionManagerListener? = null
             override val isConnected = true
-
-            override fun onEnterForeground() {
-            }
-
-            override fun onEnterBackground() {
-            }
+            override fun onEnterForeground() { }
+            override fun onEnterBackground() { }
         }
 
         val peerHostManager = PeerAddressManager(network)

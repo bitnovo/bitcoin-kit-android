@@ -8,6 +8,7 @@ import io.reactivex.Single
 class BlockDiscoveryBatch(
         private val wallet: Wallet,
         private val blockHashFetcher: BlockHashFetcher,
+        private val publicKeyManager: PublicKeyManager,
         private val maxHeight: Int
 ) : IBlockDiscovery {
 
@@ -39,7 +40,7 @@ class BlockDiscoveryBatch(
         val externalPublicKeys = externalBatchInfo.publicKeys + externalNewKeys
         val internalPublicKeys = internalBatchInfo.publicKeys + internalNewKeys
 
-        val fetchResponse = blockHashFetcher.getBlockHashes(externalNewKeys, internalNewKeys)
+        val fetchResponse = blockHashFetcher.getBlockHashes(externalNewKeys, internalNewKeys, publicKeyManager.extendedPublicKey(account))
         val resultBlockHashes = blockHashes + fetchResponse.blockHashes.filter { it.height <= maxHeight }
 
         return when {
