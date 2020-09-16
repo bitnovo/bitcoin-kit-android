@@ -1,9 +1,14 @@
 package io.horizontalsystems.bitcoincore.core
 
+import io.horizontalsystems.bitcoincore.crypto.Base58
+import io.horizontalsystems.bitcoincore.extensions.hexToByteArray
 import io.horizontalsystems.bitcoincore.models.PublicKey
+import io.horizontalsystems.bitcoincore.utils.Utils
 import io.horizontalsystems.hdwalletkit.HDKey
 import io.horizontalsystems.hdwalletkit.HDWallet
 import java.lang.Exception
+import java.nio.ByteBuffer
+import java.util.*
 
 class Wallet(private val hdWallet: HDWallet) {
 
@@ -29,6 +34,10 @@ class Wallet(private val hdWallet: HDWallet) {
 
     fun rootPrivateKey(account: Int): HDKey {
         return hdWallet.rootPrivateKey(account)
+    }
+
+    fun extendedPublicKey(account: Int): ByteArray {
+        return hdWallet.extendedPublicKey(account)
     }
 
     open class HDWalletError : Exception() {
