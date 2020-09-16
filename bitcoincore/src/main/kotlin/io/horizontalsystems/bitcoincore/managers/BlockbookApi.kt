@@ -3,8 +3,8 @@ package io.horizontalsystems.bitcoincore.managers
 import io.horizontalsystems.bitcoincore.core.IInitialSyncApi
 import java.util.logging.Logger
 
-class BlockbookApi(host: String) : IInitialSyncApi {
-    private val apiManager = ApiManager(host)
+class BlockbookApi(host: String, headers: List<Pair<String, String>> = listOf()) : IInitialSyncApi {
+    private val apiManager = ApiManager(host, headers)
     private val logger = Logger.getLogger("BlockbookApi")
 
     override fun getTransactions(addresses: List<String>, xpub: String): List<TransactionItem> {

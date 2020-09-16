@@ -14,7 +14,7 @@ import java.net.URL
 import java.util.concurrent.TimeUnit
 import java.util.logging.Logger
 
-class ApiManager(private val host: String) {
+class ApiManager(private val host: String, private val headers: List<Pair<String, String>> = listOf()) {
     private val logger = Logger.getLogger("ApiManager")
 
     @Throws
@@ -30,6 +30,9 @@ class ApiManager(private val host: String) {
                         connectTimeout = 5000
                         readTimeout = 60000
                         setRequestProperty("Accept", "application/json")
+                        for (header in headers) {
+                            setRequestProperty(header.first, header.second)
+                        }
                     }.getInputStream()
                     .use {
                         Json.parse(it.bufferedReader())
