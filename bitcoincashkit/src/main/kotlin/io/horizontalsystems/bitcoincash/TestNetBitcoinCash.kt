@@ -23,7 +23,7 @@ class TestNetBitcoinCash : Network() {
 
     override var dnsSeeds = listOf(
             "testnet-seed.bitcoinabc.org",          // Bitcoin ABC seeder
-            "testnet-seed-abc.bitcoinforks.org",    // bitcoinforks seeders
+            "testnet-seed-bch.bitcoinforks.org",    // bitcoinforks seeders
             "testnet-seed.bitprim.org",             // Bitprim
             "testnet-seed.deadalnix.me",            // Amaury SÉCHET
             "testnet-seeder.criptolayer.net"        // criptolayer.net
