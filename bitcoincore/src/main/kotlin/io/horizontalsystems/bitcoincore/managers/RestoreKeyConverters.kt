@@ -88,3 +88,16 @@ class KeyHashRestoreKeyConverter : IRestoreKeyConverter {
        return listOf(publicKey.publicKeyHash)
     }
 }
+
+class CashRestoreKeyConverter(private val addressConverter: IAddressConverter) : IRestoreKeyConverter {
+
+    override fun keysForApiRestore(publicKey: PublicKey): List<String> {
+        val cashAddress = addressConverter.convert(publicKey, ScriptType.P2PKH).string
+
+        return listOf(cashAddress)
+    }
+
+    override fun bloomFilterElements(publicKey: PublicKey): List<ByteArray> {
+        return listOf(publicKey.publicKeyHash, publicKey.publicKey)
+    }
+}

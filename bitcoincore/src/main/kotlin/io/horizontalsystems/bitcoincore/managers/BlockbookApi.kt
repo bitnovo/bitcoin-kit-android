@@ -3,7 +3,7 @@ package io.horizontalsystems.bitcoincore.managers
 import io.horizontalsystems.bitcoincore.core.IInitialSyncApi
 import java.util.logging.Logger
 
-class BlockbookApi(host: String, headers: List<Pair<String, String>> = listOf()) : IInitialSyncApi {
+open class BlockbookApi(host: String, headers: List<Pair<String, String>> = listOf()) : IInitialSyncApi {
     private val apiManager = ApiManager(host, headers)
     private val logger = Logger.getLogger("BlockbookApi")
 
@@ -15,22 +15,31 @@ class BlockbookApi(host: String, headers: List<Pair<String, String>> = listOf())
         var totalPages = 1
         while (page < totalPages) {
             page++
-            val json = apiManager.doOkHttpGet(false, "/api/v2/xpub/${xpub}?page=${page}&details=txs&tokens=derived").asObject()
+            val json = apiManager.doOkHttpGet(false, "/api/v2/xpub/${xpub}?page=${page}&details=txs").asObject()
             totalPages = json["totalPages"].asInt()
             for (item in json["transactions"].asArray()) {
                 val tx = item.asObject()
 
-                tx["blockhash"] ?: continue
-                tx["blockheight"] ?: continue
+                val blockHash = tx["blockHash"] ?: continue
+                val blockHeight = tx["blockHeight"] ?: continue
+
                 val outputs = mutableListOf<TransactionOutputItem>()
 
                 for (outputItem in tx["vout"].asArray()) {
                     val outputJson = outputItem.asObject()
 
-                    val script = (outputJson["hex"] ?: continue).asString()
                     val addrs = (outputJson["addresses"] ?: continue).asArray()
+                    val address = addrs[0].asString()
+                    if (!addresses.contains(address)) {
+                        continue
+                    }
+                    val script = (outputJson["hex"] ?: continue).asString()
 
-                    outputs.add(TransactionOutputItem(script, addrs[0].asString()))
+                    outputs.add(TransactionOutputItem(script, address))
+                }
+
+                if (outputs.isNotEmpty()) {
+                    transactions.add(TransactionItem(blockHash.asString(), blockHeight.asInt(), outputs))
                 }
             }
         }

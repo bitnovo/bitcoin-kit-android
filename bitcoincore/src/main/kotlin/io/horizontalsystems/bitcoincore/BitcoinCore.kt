@@ -604,7 +604,7 @@ class BitcoinCore(
     }
 
     fun getExtendedPublicKey(): String {
-        return ""
+        return publicKeyManager.extendedPublicKey(0)
     }
 
     sealed class KitState {
