@@ -17,7 +17,22 @@ class BlockbookApi(host: String, headers: List<Pair<String, String>> = listOf())
             page++
             val json = apiManager.doOkHttpGet(false, "/api/v2/xpub/${xpub}?page=${page}&details=txs&tokens=derived").asObject()
             totalPages = json["totalPages"].asInt()
-            val tokens = json["tokens"].asArray()
+            for (item in json["transactions"].asArray()) {
+                val tx = item.asObject()
+
+                tx["blockhash"] ?: continue
+                tx["blockheight"] ?: continue
+                val outputs = mutableListOf<TransactionOutputItem>()
+
+                for (outputItem in tx["vout"].asArray()) {
+                    val outputJson = outputItem.asObject()
+
+                    val script = (outputJson["hex"] ?: continue).asString()
+                    val addrs = (outputJson["addresses"] ?: continue).asArray()
+
+                    outputs.add(TransactionOutputItem(script, addrs[0].asString()))
+                }
+            }
         }
 
         return transactions
