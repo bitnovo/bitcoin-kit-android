@@ -40,8 +40,8 @@ object PaymentAddressParserTest : Spek({
             paymentData = BitcoinPaymentData(address = "address_data", amount = 0.01)
             checkPaymentData(addressParser, "bitcoin:address_data?amount=0.01", paymentData)
 
-            paymentData = BitcoinPaymentData(address = "address_data", amount = 0.01, label = "test_sender")
-            checkPaymentData(addressParser, "bitcoin:address_data?amount=0.01?label=test_sender", paymentData)
+            paymentData = BitcoinPaymentData(address = "address_data", amount = 0.01, label = "test sender")
+            checkPaymentData(addressParser, "bitcoin:address_data?amount=0.01&label=test%20sender", paymentData)
 
             paymentData = BitcoinPaymentData(address = "address_data", parameters = mutableMapOf("custom" to "any"))
             checkPaymentData(addressParser, "bitcoin:address_data?custom=any", paymentData)
@@ -71,8 +71,8 @@ object PaymentAddressParserTest : Spek({
             paymentData = BitcoinPaymentData(address = "bitcoincash:address_data", amount = 0.01)
             checkPaymentData(addressParser, "bitcoincash:address_data?amount=0.01", paymentData)
 
-            paymentData = BitcoinPaymentData(address = "bitcoincash:address_data", amount = 0.01, label = "test_sender")
-            checkPaymentData(addressParser, "bitcoincash:address_data?amount=0.01?label=test_sender", paymentData)
+            paymentData = BitcoinPaymentData(address = "bitcoincash:address_data", amount = 0.01, label = "test sender")
+            checkPaymentData(addressParser, "bitcoincash:address_data?amount=0.01&label=test%20sender", paymentData)
 
             paymentData = BitcoinPaymentData(address = "bitcoincash:address_data", parameters = mutableMapOf("custom" to "any"))
             checkPaymentData(addressParser, "bitcoincash:address_data?custom=any", paymentData)

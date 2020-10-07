@@ -1,12 +1,22 @@
 package io.horizontalsystems.bitcoincore.utils
 
 import io.horizontalsystems.bitcoincore.models.BitcoinPaymentData
+import java.io.UnsupportedEncodingException
+import java.net.URLDecoder
 
 class PaymentAddressParser(private val validScheme: String, private val removeScheme: Boolean) {
     private val parameterVersion = "version"
     private val parameterAmount = "amount"
     private val parameterLabel = "label"
     private val parameterMessage = "message"
+
+    private fun decode(value: String): String {
+        return try {
+            URLDecoder.decode(value, "UTF-8")
+        } catch (e: UnsupportedEncodingException) {
+            value
+        }
+    }
 
     fun parse(paymentAddress: String): BitcoinPaymentData {
         var parsedString = paymentAddress
@@ -30,7 +40,7 @@ class PaymentAddressParser(private val validScheme: String, private val removeSc
         }
 
         // check exist params
-        val versionSeparatedParts = parsedString.split(";","?")
+        val versionSeparatedParts = parsedString.split(";", "?", "&")
 
         if (versionSeparatedParts.size < 2) {
             address = parsedString
@@ -44,11 +54,11 @@ class PaymentAddressParser(private val validScheme: String, private val removeSc
             val parts = parameter.split("=")
             if (parts.size == 2) {
                 when (parts[0]) {
-                    parameterVersion -> version = parts [1]
+                    parameterVersion -> version = parts[1]
                     parameterAmount-> amount = parts[1].toDoubleOrNull() //todo add try catch for exception
-                    parameterLabel -> label = parts [1]
-                    parameterMessage -> message = parts[1]
-                    else -> parameters[parts[0]] = parts[1]
+                    parameterLabel -> label = decode(parts[1])
+                    parameterMessage -> message = decode(parts[1])
+                    else -> parameters[parts[0]] = decode(parts[1])
                 }
             }
         }
