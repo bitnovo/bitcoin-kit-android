@@ -122,4 +122,8 @@ abstract class AbstractKit {
     fun getRawTransaction(transactionHash: String): String? {
         return bitcoinCore.getRawTransaction(transactionHash)
     }
+
+    fun getExtendedPublicKey(): String {
+        return bitcoinCore.getExtendedPublicKey()
+    }
 }
