@@ -11,7 +11,7 @@ class TestNetLitecoin : Network() {
     override var bip32HeaderPriv: Int = 0x04358394
     override var addressVersion: Int = 111
     override var addressSegwitHrp: String = "tltc"
-    override var addressScriptVersion: Int = 0x32
+    override var addressScriptVersion: Int = 0x3a
     override var coinType: Int = 1
 
     override val maxBlockSize = 1_000_000
