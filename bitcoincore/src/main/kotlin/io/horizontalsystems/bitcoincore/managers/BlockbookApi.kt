@@ -15,7 +15,7 @@ open class BlockbookApi(host: String, headers: List<Pair<String, String>> = list
         var totalPages = 1
         while (page < totalPages) {
             page++
-            val json = apiManager.doOkHttpGet(false, "/api/v2/xpub/${xpub}?page=${page}&details=txs").asObject()
+            val json = apiManager.doOkHttpGet(false, "api/v2/xpub/${xpub}?page=${page}&details=txs").asObject()
             totalPages = json["totalPages"].asInt()
             for (item in json["transactions"].asArray()) {
                 val tx = item.asObject()

@@ -50,7 +50,11 @@ class ApiManager(private val host: String, private val headers: List<Pair<String
             logger.info("Fetching $path")
 
             val url = URL(path)
-            val urlConnection = url.openConnection() as HttpURLConnection
+            val urlConnection = url.openConnection().apply {
+                for (header in headers) {
+                    setRequestProperty(header.first, header.second)
+                }
+            } as HttpURLConnection
             urlConnection.requestMethod = "POST"
             val out = BufferedOutputStream(urlConnection.outputStream)
             val writer = BufferedWriter(OutputStreamWriter(out, "UTF-8"))
@@ -82,9 +86,15 @@ class ApiManager(private val host: String, private val headers: List<Pair<String
                         }.build()
             }
 
-            httpClient.newCall(Request.Builder().url(url).build())
-                    .execute()
-                    .use { response ->
+            httpClient.newCall(Request.Builder()
+                .apply {
+                    for (header in headers) {
+                        addHeader(header.first, header.second)
+                    }
+                }.url(url).build()
+            )
+                .execute()
+                .use { response ->
 
                         if (response.isSuccessful) {
                             response.body?.let {
